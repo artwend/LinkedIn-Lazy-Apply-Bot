@@ -12,6 +12,15 @@ from itertools import product
 
 log = logging.getLogger(__name__)
 
+def sleep_random(min_seconds: float = 1, max_seconds: float = 3.5) -> float:
+    """
+    Sleeps for a random amount of time between min_seconds and max_seconds.
+    """
+    wait_time = random.uniform(min_seconds, max_seconds)
+    log.debug(f"Sleeping for {round(wait_time, 1)} seconds")
+    time.sleep(wait_time)
+    return wait_time
+
 class LinkedinEasyApply:
     def __init__(self, parameters, driver: WebDriver):
         self.browser = driver
@@ -71,7 +80,7 @@ class LinkedinEasyApply:
 
         if '/checkpoint/challenge/' in current_url or 'security check' in page_source:
             input("Please complete the security check and press enter in this console when it is done.")
-            time.sleep(random.uniform(5.5, 10.5))
+            sleep_random(5.5, 10.5)
 
     def start_applying(self):
         searches = list(product(self.positions, self.locations))
@@ -98,30 +107,12 @@ class LinkedinEasyApply:
                     self.apply_jobs(location)
                     print("Applying to jobs on this page has been completed!")
 
-                    time_left = minimum_page_time - time.time()
-                    if time_left > 0:
-                        print("Sleeping for " + str(time_left) + " seconds.")
-                        time.sleep(time_left)
-                        minimum_page_time = time.time() + minimum_time
-                    if page_sleep % 5 == 0:
-                        sleep_time = random.randint(500, 900)
-                        print("Sleeping for " + str(sleep_time/60) + " minutes.")
-                        time.sleep(sleep_time)
-                        page_sleep += 1
+                    page_sleep, minimum_page_time = self._handle_sleep(page_sleep, minimum_page_time, minimum_time)
             except:
                 traceback.print_exc()
                 pass
 
-            time_left = minimum_page_time - time.time()
-            if time_left > 0:
-                print("Sleeping for " + str(time_left) + " seconds.")
-                time.sleep(time_left)
-                minimum_page_time = time.time() + minimum_time
-            if page_sleep % 5 == 0:
-                sleep_time = random.randint(500, 900)
-                print("Sleeping for " + str(sleep_time/60) + " minutes.")
-                time.sleep(sleep_time)
-                page_sleep += 1
+            page_sleep, minimum_page_time = self._handle_sleep(page_sleep, minimum_page_time, minimum_time)
 
 
     def apply_jobs(self, location):
@@ -703,6 +694,23 @@ class LinkedinEasyApply:
         pyautogui.keyUp('ctrl')
         time.sleep(1.0)
         pyautogui.press('esc')
+
+    def _handle_sleep(self, page_sleep, minimum_page_time, minimum_time):
+        """Handle sleep logic to avoid duplication.
+
+        Returns updated page_sleep and minimum_page_time.
+        """
+        time_left = minimum_page_time - time.time()
+        if time_left > 0:
+            print(f"Sleeping for {time_left} seconds.")
+            time.sleep(time_left)
+            minimum_page_time = time.time() + minimum_time
+        if page_sleep % 5 == 0:
+            sleep_time = random.randint(500, 900)
+            print(f"Sleeping for {sleep_time/60} minutes.")
+            time.sleep(sleep_time)
+            page_sleep += 1
+        return page_sleep, minimum_page_time
 
     def get_base_search_url(self, parameters):
         remote_url = ""
