@@ -1,9 +1,11 @@
-import yaml, pdb
+import yaml, pdb, re
 import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from linkedineasyapply import LinkedinEasyApply
-from validate_email import validate_email
+# from validate_email import validate_email
+
+EMAIL_PATTERN = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 
 def init_browser():
     browser_options = webdriver.ChromeOptions()
@@ -46,7 +48,7 @@ def validate_yaml():
         if mandatory_param not in parameters:
             raise Exception(mandatory_param + ' is not inside the yml file!')
 
-    assert validate_email(parameters['email'])
+    assert EMAIL_PATTERN.match(parameters['email'])
     assert len(str(parameters['password'])) > 0
 
     assert isinstance(parameters['disableAntiLock'], bool)
