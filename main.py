@@ -1,19 +1,29 @@
 import yaml, pdb
+import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from linkedineasyapply import LinkedinEasyApply
 from validate_email import validate_email
 
 def init_browser():
-    browser_options = Options()
-    options = ['--disable-blink-features', '--no-sandbox', '--start-maximized', '--disable-extensions',
-               '--ignore-certificate-errors', '--disable-blink-features=AutomationControlled']
+    browser_options = webdriver.ChromeOptions()
+    profile_path = os.path.expandvars(r"%TEMP%/auto-job-apply-profile")
+    options = [
+        '--no-first-run',
+        '--no-default-browser-check',
+        '--disable-blink-features',
+        '--no-sandbox',
+        '--start-maximized',
+        '--disable-extensions',
+        '--ignore-certificate-errors',
+        '--disable-blink-features=AutomationControlled'
+        f"--user-data-dir={profile_path}"
+    ]
 
     for option in options:
         browser_options.add_argument(option)
 
-    driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=browser_options)
+    driver = webdriver.Chrome(options=browser_options)
 
     driver.set_window_position(0, 0)
     driver.maximize_window()
